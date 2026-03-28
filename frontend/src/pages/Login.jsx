@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Navigate } from "react-router-dom";
+const API = import.meta.env.VITE_API_URL;
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -62,10 +62,10 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-surface font-sans">
       <div className="w-full max-w-sm space-y-12">
-        
+
         <header className="text-center space-y-3">
           <div className="mx-auto w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 rotate-12 group hover:rotate-0 transition-transform cursor-pointer">
-             <span className="material-symbols-outlined text-white text-2xl font-black">rocket_launch</span>
+            <span className="material-symbols-outlined text-white text-2xl font-black">rocket_launch</span>
           </div>
           <h1 className="text-4xl font-black tracking-tighter text-on-surface">TechClub Portal</h1>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-on-surface-variant opacity-60">Authentication Gateway</p>
@@ -128,12 +128,12 @@ export default function Login() {
         </form>
 
         <footer className="text-center text-[9px] font-bold uppercase tracking-widest text-outline/30 space-y-2">
-           <p>© {new Date().getFullYear()} TECHCLUB OPS. ALL SYSTEMS GO.</p>
-           <div className="flex justify-center gap-4">
-              <span>GDPR COMPLIANT</span>
-              <span className="opacity-40">•</span>
-              <span>SECURE LOGIN</span>
-           </div>
+          <p>© {new Date().getFullYear()} TECHCLUB OPS. ALL SYSTEMS GO.</p>
+          <div className="flex justify-center gap-4">
+            <span>GDPR COMPLIANT</span>
+            <span className="opacity-40">•</span>
+            <span>SECURE LOGIN</span>
+          </div>
         </footer>
       </div>
     </div>
