@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 import BottomNav from "../components/BottomNav";
 import EventCard from "../components/EventCard";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function getToken() {
   return localStorage.getItem("token");

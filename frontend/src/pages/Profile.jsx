@@ -4,7 +4,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import BottomNav from "../components/BottomNav";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const LEVEL_INFO = [
   { level: 4, label: "Legendary Architect", minXp: 700, next: Infinity, color: "#f59e0b" },

@@ -15,14 +15,19 @@ const notificationRoutes = require("./routes/notification");
 
 const app = express();
 
+// Enhanced CORS for production
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    origin: process.env.CORS_ORIGIN || process.env.FRONTEND_URL || "*",
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/events", eventRoutes);
@@ -33,10 +38,21 @@ app.use("/api/polls", pollRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/notifications", notificationRoutes);
 
+// Health check route for Render
+app.get("/", (req, res) => {
+  res.json({ msg: "TechClub Portal API is running", status: "healthy" });
+});
+
+// MongoDB Connection with better error handling
+const PORT = process.env.PORT || 5000;
+
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  .then(() => {
+    console.log("MongoDB Connected");
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+    process.exit(1);
+  });

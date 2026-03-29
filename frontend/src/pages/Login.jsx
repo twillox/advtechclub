@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Navigate } from "react-router-dom";
-const API = import.meta.env.VITE_API_URL;
-
-
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
