@@ -10,6 +10,7 @@ import Polls from "./pages/Polls";
 import Concerns from "./pages/Concerns";
 import Resources from "./pages/Resources";
 import Profile from "./pages/Profile";
+import Onboarding from "./components/Onboarding";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminSidebar from "./components/AdminSidebar";
 
@@ -33,8 +34,12 @@ function App() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const role = user.role;
 
+  // Check if user needs onboarding (no username means incomplete profile)
+  const needsOnboarding = token && role !== "admin" && !user.username;
+
   const renderRoot = () => {
     if (!token) return <Navigate to="/login" replace />;
+    if (needsOnboarding) return <Onboarding />;
     if (role === "admin") return <Navigate to="/admin" replace />;
     return <Navigate to="/dashboard" replace />;
   };
@@ -44,6 +49,7 @@ function App() {
       <Routes>
         <Route path="/" element={renderRoot()} />
         <Route path="/login" element={<Login />} />
+        <Route path="/onboarding" element={needsOnboarding ? <Onboarding /> : <Navigate to="/dashboard" replace />} />
 
         {/* User Routes */}
         <Route path="/dashboard" element={<Wrap><ProtectedRoute requiredRole="user"><Dashboard /></ProtectedRoute></Wrap>} />

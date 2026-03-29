@@ -115,24 +115,24 @@ router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
 router.post("/:id/register", authMiddleware, async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
-    if (!event) return res.status(404).json({ msg: "Operational target (event) not found" });
+    if (!event) return res.status(404).json({ msg: "Event not found" });
 
     const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ msg: "User agent not recognized" });
+    if (!user) return res.status(404).json({ msg: "User not found" });
 
     // Initialize collections if missing
     if (!user.registeredEvents) user.registeredEvents = [];
     if (!event.registeredUsers) event.registeredUsers = [];
 
     const already = user.registeredEvents.some((x) => String(x) === String(event._id));
-    if (already) return res.status(400).json({ msg: "Identity record already linked to this event" });
+    if (already) return res.status(400).json({ msg: "Already registered for this event" });
 
     // Add event ID and calculate XP delta
     user.registeredEvents.push(event._id);
     const xpReward = Number(event.xp) || 10;
     user.xp = (user.xp || 0) + xpReward;
     
-    // Recalculate level (handled in pre-save but being extra explicit here if needed)
+    // Save user with updated XP
     await user.save();
 
     if (!event.registeredUsers.some((x) => String(x) === String(user._id))) {
@@ -140,11 +140,24 @@ router.post("/:id/register", authMiddleware, async (req, res) => {
       await event.save();
     }
 
-    console.log(`[CORE] User ${user.email} registered for ${event.title}. +${xpReward} XP awarded.`);
-    res.json({ msg: "Protocol successful. Registry updated.", xp: user.xp, level: user.level });
+    console.log(`User ${user.email} registered for ${event.title}. +${xpReward} XP awarded.`);
+    res.json({ 
+      msg: "Registration successful! XP awarded.", 
+      xp: user.xp, 
+      level: user.level,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        xp: user.xp,
+        level: user.level,
+        registeredEvents: user.registeredEvents
+      }
+    });
   } catch (err) {
-    console.error("Critical Register Error:", err);
-    res.status(500).json({ msg: "Internal system failure in registry sequence", error: err.message });
+    console.error("Registration Error:", err);
+    res.status(500).json({ msg: "Failed to register for event", error: err.message });
   }
 });
 

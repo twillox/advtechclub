@@ -80,67 +80,66 @@ export default function Profile() {
   if (!user) return <div className="p-20 text-center text-outline">User not found.</div>;
 
   return (
-    <div className="bg-[#f8f9fa] text-[#2d3435] min-h-screen pb-40 font-sans selection:bg-primary/10">
+    <div className="bg-[#f8f9fa] text-[#2d3435] min-h-screen pb-20 font-sans selection:bg-primary/10">
       <Navbar />
       
-      <main className="pt-32 px-6 max-w-5xl mx-auto space-y-12">
+      <main className="pt-24 px-4 md:px-6 max-w-5xl mx-auto space-y-8">
         
         {/* Header Hero */}
         <section className="relative group">
            <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-[48px] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000"></div>
-           <div className="relative bg-white/70 backdrop-blur-3xl p-10 rounded-[48px] border border-white/50 shadow-2xl flex flex-col md:flex-row gap-10 items-center md:items-start text-center md:text-left">
+           <div className="relative bg-white/70 backdrop-blur-3xl p-6 md:p-10 rounded-[48px] border border-white/50 shadow-2xl flex flex-col md:flex-row gap-6 md:gap-10 items-center text-center md:text-left">
               
-              <div className="relative">
-                 <div className="w-40 h-40 rounded-[40px] bg-gradient-to-br from-surface-container-high to-surface-container shadow-inner flex items-center justify-center overflow-hidden border-4 border-white">
+              <div className="relative flex-shrink-0">
+                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-[40px] bg-gradient-to-br from-surface-container-high to-surface-container shadow-inner flex items-center justify-center overflow-hidden border-4 border-white">
                     {user.profilePic ? (
                        <img src={user.profilePic} alt={user.name} className="w-full h-full object-cover" />
                     ) : (
-                       <span className="material-symbols-outlined text-7xl text-outline/20">fingerprint</span>
+                       <span className="material-symbols-outlined text-5xl md:text-7xl text-outline/20">fingerprint</span>
                     )}
                  </div>
                  {isMe && !editing && (
-                    <button onClick={() => setEditing(true)} className="absolute -bottom-2 -right-2 bg-primary text-white p-3 rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all outline-none cursor-pointer">
-                       <span className="material-symbols-outlined text-base">edit_note</span>
+                    <button onClick={() => setEditing(true)} className="absolute -bottom-2 -right-2 bg-primary text-white p-2 md:p-3 rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all outline-none cursor-pointer">
+                       <span className="material-symbols-outlined text-sm md:text-base">edit_note</span>
                     </button>
                  )}
               </div>
 
-              <div className="flex-1 space-y-6">
-                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-3 justify-center md:justify-start">
-                         <h1 className="text-4xl font-black tracking-tighter text-[#2d3435] uppercase italic">{user.name}</h1>
-                         {user.role === 'admin' && <span className="bg-rose-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">Council</span>}
-                      </div>
-                      <p className="text-sm font-bold text-on-surface-variant/60 tracking-tight mt-1">{user.department || "No Department Set"} • Year {user.year || "N/A"}</p>
+              <div className="flex-1 w-full min-w-0 space-y-4 md:space-y-6">
+                 <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2 justify-center md:justify-start flex-wrap">
+                       <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter text-[#2d3435] uppercase truncate max-w-full">{user.name}</h1>
+                       {user.role === 'admin' && <span className="bg-rose-500 text-white text-[8px] md:text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter flex-shrink-0">Council</span>}
                     </div>
-                    {isMe && (
-                       <div className="flex items-center gap-2 bg-surface-container-low p-2 rounded-2xl border border-outline-variant/10">
-                          <code className="text-[10px] font-black opacity-40 px-3">@{user.username || 'unclaimed'}</code>
-                          <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/user/${user.username}`)} className="p-2 hover:bg-white rounded-xl transition-all cursor-pointer">
-                             <span className="material-symbols-outlined text-[16px]">share</span>
-                          </button>
-                       </div>
-                    )}
+                    <p className="text-xs md:text-sm font-bold text-on-surface-variant/60 truncate">{user.department || "No Department Set"} • {user.year || "N/A"}</p>
                  </div>
+                 
+                 {isMe && (
+                    <div className="flex items-center gap-2 bg-surface-container-low p-2 rounded-2xl border border-outline-variant/10 max-w-full">
+                       <code className="text-[9px] md:text-[10px] font-black opacity-40 px-2 truncate">@{user.username || 'unclaimed'}</code>
+                       <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/user/${user.username}`)} className="p-2 hover:bg-white rounded-xl transition-all cursor-pointer flex-shrink-0">
+                          <span className="material-symbols-outlined text-[14px] md:text-[16px]">share</span>
+                       </button>
+                    </div>
+                 )}
 
                  {/* Gamification Bar */}
-                 <div className="space-y-3">
-                    <div className="flex justify-between items-end">
+                 <div className="space-y-2 md:space-y-3">
+                    <div className="flex justify-between items-end flex-wrap gap-2">
                        <div className="flex items-center gap-2">
-                          <span className="text-xl font-black italic tracking-tighter" style={{ color: levelData.color }}>Lvl. {user.level}</span>
-                          <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">— {levelData.label}</span>
+                          <span className="text-lg md:text-xl font-black italic tracking-tighter" style={{ color: levelData.color }}>Lvl. {user.level}</span>
+                          <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] opacity-40 hidden sm:inline">— {levelData.label}</span>
                        </div>
-                       <span className="text-[10px] font-black text-primary uppercase">XP: {user.xp} / {levelData.next === Infinity ? 'MAX' : levelData.next}</span>
+                       <span className="text-[8px] md:text-[10px] font-black text-primary uppercase">XP: {user.xp} / {levelData.next === Infinity ? 'MAX' : levelData.next}</span>
                     </div>
-                    <div className="h-4 bg-surface-container-low rounded-full p-1 border border-outline-variant/10 shadow-inner overflow-hidden">
+                    <div className="h-3 md:h-4 bg-surface-container-low rounded-full p-0.5 md:p-1 border border-outline-variant/10 shadow-inner overflow-hidden">
                        <div 
                           className="h-full rounded-full shadow-[0px_4px_12px_rgba(0,0,0,0.1)] transition-all duration-1000 ease-out"
                           style={{ backgroundColor: levelData.color, width: `${progressPct}%` }}
                        ></div>
                     </div>
-                    <p className="text-[9px] font-black uppercase tracking-[0.3em] opacity-30 text-center md:text-left">
-                       {levelData.next === Infinity ? "Apex Level Reached" : `${levelData.next - user.xp} XP needed for next evolution`}
+                    <p className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] opacity-30">
+                       {levelData.next === Infinity ? "Max Level" : `${levelData.next - user.xp} XP to next level`}
                     </p>
                  </div>
               </div>
@@ -148,28 +147,28 @@ export default function Profile() {
         </section>
 
         {/* Stats Summary Grid */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
            {[
               { label: "Points", val: user.xp, icon: "toll", color: "text-amber-500" },
-              { label: "Global Rank", val: `#${user.rank || '??'}`, icon: "leaderboard", color: "text-rose-500" },
-              { label: "Credentials", val: user.certificates?.length || 0, icon: "card_membership", color: "text-blue-500" },
+              { label: "Rank", val: `#${user.rank || '??'}`, icon: "leaderboard", color: "text-rose-500" },
+              { label: "Certificates", val: user.certificates?.length || 0, icon: "card_membership", color: "text-blue-500" },
               { label: "Badges", val: user.badges?.length || 0, icon: "verified", color: "text-purple-500" },
            ].map((s, i) => (
-              <div key={i} className="bg-white/40 backdrop-blur-xl p-6 rounded-[32px] border border-white/60 shadow-lg flex flex-col items-center justify-center text-center group hover:scale-[1.02] transition-all">
-                 <span className={`material-symbols-outlined text-2xl mb-2 ${s.color}`}>{s.icon}</span>
-                 <p className="text-2xl font-black italic tracking-tighter leading-none">{s.val}</p>
-                 <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 mt-1">{s.label}</p>
+              <div key={i} className="bg-white/40 backdrop-blur-xl p-4 md:p-6 rounded-[32px] border border-white/60 shadow-lg flex flex-col items-center justify-center text-center group hover:scale-[1.02] transition-all">
+                 <span className={`material-symbols-outlined text-xl md:text-2xl mb-1 md:mb-2 ${s.color}`}>{s.icon}</span>
+                 <p className="text-xl md:text-2xl font-black italic tracking-tighter leading-none truncate max-w-full">{s.val}</p>
+                 <p className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.2em] opacity-40 mt-1 text-center">{s.label}</p>
               </div>
            ))}
         </section>
 
         {/* Dynamic Tabs */}
-        <section className="space-y-8">
+        <section className="space-y-6">
            <div className="flex gap-2 bg-surface-container-low/50 p-2 rounded-3xl w-fit mx-auto border border-outline-variant/10 overflow-x-auto scrollbar-hide">
               {["overview", "projects", "achievements", "activity"].map(t => (
                  <button 
                   key={t} onClick={() => setActiveTab(t)}
-                  className={`px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all cursor-pointer ${activeTab === t ? 'bg-white text-primary shadow-xl scale-105' : 'text-outline hover:text-on-surface opacity-50'}`}
+                  className={`px-6 md:px-8 py-2 md:py-3 rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] transition-all cursor-pointer whitespace-nowrap ${activeTab === t ? 'bg-white text-primary shadow-xl scale-105' : 'text-outline hover:text-on-surface opacity-50'}`}
                  >
                     {t}
                  </button>
@@ -181,22 +180,22 @@ export default function Profile() {
                  className={`opacity-100 transition-opacity duration-300`}
               >
                  {activeTab === 'overview' && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                       <div className="md:col-span-2 space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                       <div className="md:col-span-2 space-y-6 md:space-y-8">
                           {/* Skills & Interests */}
-                          <div className="bg-white p-8 rounded-[40px] shadow-2xl border border-outline-variant/5">
-                             <h4 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-6 flex items-center gap-2">
-                                <span className="material-symbols-outlined text-base">architecture</span>
-                                Knowledge Tree & Interests
+                          <div className="bg-white p-6 md:p-8 rounded-[40px] shadow-2xl border border-outline-variant/5">
+                             <h4 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-4 md:mb-6 flex items-center gap-2 flex-wrap">
+                                <span className="material-symbols-outlined text-sm md:text-base">architecture</span>
+                                Skills & Interests
                              </h4>
                              <div className="flex flex-wrap gap-2">
                                 {user.skills?.map((s, i) => (
-                                   <span key={i} className="px-5 py-2.5 bg-primary/5 text-primary rounded-xl text-[11px] font-black uppercase tracking-tight border border-primary/10">{s}</span>
+                                   <span key={i} className="px-4 py-2 md:px-5 md:py-2.5 bg-primary/5 text-primary rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-tight border border-primary/10 max-w-full truncate">{s}</span>
                                 ))}
                                 {user.interests?.map((s, i) => (
-                                   <span key={i} className="px-5 py-2.5 bg-secondary/5 text-secondary rounded-xl text-[11px] font-black uppercase tracking-tight border border-secondary/10">{s}</span>
+                                   <span key={i} className="px-4 py-2 md:px-5 md:py-2.5 bg-secondary/5 text-secondary rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-tight border border-secondary/10 max-w-full truncate">{s}</span>
                                 ))}
-                                {(!user.skills?.length && !user.interests?.length) && <p className="text-xs italic text-outline opacity-40">No attributes mapped...</p>}
+                                {(!user.skills?.length && !user.interests?.length) && <p className="text-xs italic text-outline opacity-40">No skills or interests added yet</p>}
                              </div>
                           </div>
 
@@ -294,105 +293,82 @@ export default function Profile() {
 
       {/* Profile Edit Overlay */}
       {editing && (
-            <div className="fixed inset-0 bg-background/80 backdrop-blur-2xl z-[100] p-6 flex items-center justify-center overscroll-none transition-all duration-500 ease-in-out">
+            <div className="fixed inset-0 bg-background/80 backdrop-blur-2xl z-[100] p-4 md:p-6 flex items-center justify-center overscroll-none transition-all duration-500 ease-in-out">
                <div 
-                  className="bg-white w-full max-w-2xl rounded-[48px] shadow-[0px_40px_100px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col max-h-[90vh]"
+                  className="bg-white w-full max-w-xl rounded-[32px] shadow-[0px_40px_100px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col max-h-[90vh]"
                >
-                  <div className="bg-primary p-8 text-white flex justify-between items-center">
+                  <div className="bg-primary p-6 text-white flex justify-between items-center">
                      <div>
-                        <h2 className="text-2xl font-black tracking-tighter uppercase italic">Refine Identity</h2>
-                        <p className="text-[9px] font-black uppercase tracking-[0.3em] opacity-60">Profile Management</p>
+                        <h2 className="text-xl md:text-2xl font-black tracking-tighter uppercase">Edit Profile</h2>
+                        <p className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.3em] opacity-60">Update your information</p>
                      </div>
-                     <button onClick={() => setEditing(false)} className="bg-white/10 p-3 rounded-2xl hover:bg-white/20 transition-all outline-none border-none cursor-pointer">
-                        <span className="material-symbols-outlined font-black">close</span>
+                     <button onClick={() => setEditing(false)} className="bg-white/10 p-2 md:p-3 rounded-2xl hover:bg-white/20 transition-all outline-none border-none cursor-pointer">
+                        <span className="material-symbols-outlined font-black text-lg md:text-xl">close</span>
                      </button>
                   </div>
                   
-                  <form onSubmit={handleUpdate} className="p-10 space-y-8 overflow-y-auto custom-scrollbar flex-1">
-                     <div className="grid grid-cols-2 gap-6">
+                  <form onSubmit={handleUpdate} className="p-6 md:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
-                           <label className="text-[9px] font-black uppercase tracking-widest opacity-40 ml-1 italic">Full Name</label>
-                           <input type="text" className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-sm font-bold focus:ring-1 focus:ring-primary/20 transition-all" value={editForm.name} onChange={e=>setEditForm({...editForm, name: e.target.value})} />
+                           <label className="text-[9px] font-bold uppercase tracking-wide opacity-60">Full Name</label>
+                           <input type="text" className="w-full bg-surface-container-low border-none rounded-2xl py-3 px-4 text-sm font-medium focus:ring-1 focus:ring-primary/20 transition-all" value={editForm.name} onChange={e=>setEditForm({...editForm, name: e.target.value})} />
                         </div>
                         <div className="space-y-2">
-                           <label className="text-[9px] font-black uppercase tracking-widest opacity-40 ml-1 italic">Username (@)</label>
-                           <input type="text" className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-sm font-bold focus:ring-1 focus:ring-primary/20 transition-all" value={editForm.username} onChange={e=>setEditForm({...editForm, username: e.target.value})} />
+                           <label className="text-[9px] font-bold uppercase tracking-wide opacity-60">Username (@)</label>
+                           <input type="text" className="w-full bg-surface-container-low border-none rounded-2xl py-3 px-4 text-sm font-medium focus:ring-1 focus:ring-primary/20 transition-all" value={editForm.username} onChange={e=>setEditForm({...editForm, username: e.target.value})} />
                         </div>
                      </div>
 
-                     <div className="grid grid-cols-2 gap-6">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
-                           <label className="text-[9px] font-black uppercase tracking-widest opacity-40 ml-1 italic">Sector / Dept</label>
-                           <input type="text" className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-sm font-bold focus:ring-1 focus:ring-primary/20 transition-all" value={editForm.department} onChange={e=>setEditForm({...editForm, department: e.target.value})} />
+                           <label className="text-[9px] font-bold uppercase tracking-wide opacity-60">Department</label>
+                           <input type="text" className="w-full bg-surface-container-low border-none rounded-2xl py-3 px-4 text-sm font-medium focus:ring-1 focus:ring-primary/20 transition-all" value={editForm.department} onChange={e=>setEditForm({...editForm, department: e.target.value})} />
                         </div>
                         <div className="space-y-2">
-                           <label className="text-[9px] font-black uppercase tracking-widest opacity-40 ml-1 italic">Academic Cycle (Year)</label>
-                           <input type="text" className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-sm font-bold focus:ring-1 focus:ring-primary/20 transition-all" value={editForm.year} onChange={e=>setEditForm({...editForm, year: e.target.value})} />
+                           <label className="text-[9px] font-bold uppercase tracking-wide opacity-60">Year of Study</label>
+                           <select className="w-full bg-surface-container-low border-none rounded-2xl py-3 px-4 text-sm font-medium focus:ring-1 focus:ring-primary/20 transition-all" value={editForm.year} onChange={e=>setEditForm({...editForm, year: e.target.value})}>
+                              <option value="">Select Year</option>
+                              <option value="1st Year">1st Year</option>
+                              <option value="2nd Year">2nd Year</option>
+                              <option value="3rd Year">3rd Year</option>
+                              <option value="4th Year">4th Year</option>
+                              <option value="Graduate">Graduate</option>
+                           </select>
                         </div>
                      </div>
 
                      <div className="space-y-2">
-                        <label className="text-[9px] font-black uppercase tracking-widest opacity-40 ml-1 italic">Profile Avatar Link (URL)</label>
-                        <input type="url" className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-sm font-bold focus:ring-1 focus:ring-primary/20 transition-all" value={editForm.profilePic} onChange={e=>setEditForm({...editForm, profilePic: e.target.value})} />
+                        <label className="text-[9px] font-bold uppercase tracking-wide opacity-60">Profile Picture URL</label>
+                        <input type="url" className="w-full bg-surface-container-low border-none rounded-2xl py-3 px-4 text-sm font-medium focus:ring-1 focus:ring-primary/20 transition-all" value={editForm.profilePic} onChange={e=>setEditForm({...editForm, profilePic: e.target.value})} placeholder="https://example.com/photo.jpg" />
                      </div>
 
                      <div className="space-y-4 pt-4 border-t border-outline-variant/10">
-                        <label className="text-[9px] font-black uppercase tracking-widest opacity-40 ml-1 italic">Technical Skill Set (Press Enter)</label>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                           {editForm.skills?.map((s, i) => (
-                              <span key={i} className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-[10px] font-bold flex items-center gap-2">
-                                 {s}
-                                 <button type="button" onClick={() => setEditForm({...editForm, skills: editForm.skills.filter((_, idx)=>idx!==i)})} className="hover:text-black">×</button>
-                              </span>
-                           ))}
-                        </div>
-                        <input 
-                           type="text" placeholder="Add skill..." 
-                           className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-sm font-bold focus:ring-1 focus:ring-primary/20 transition-all"
-                           onKeyDown={e => {
-                              if (e.key === 'Enter') {
-                                 e.preventDefault();
-                                 const val = e.target.value.trim();
-                                 if (val && !editForm.skills?.includes(val)) {
-                                    setEditForm({...editForm, skills: [...(editForm.skills||[]), val]});
-                                    e.target.value = '';
-                                 }
-                              }
-                           }}
+                        <label className="text-[9px] font-bold uppercase tracking-wide opacity-60">Skills (comma separated)</label>
+                        <textarea 
+                           className="w-full bg-surface-container-low border-none rounded-2xl py-3 px-4 text-sm font-medium focus:ring-1 focus:ring-primary/20 transition-all resize-none"
+                           rows="3"
+                           value={(editForm.skills || []).join(', ')}
+                           onChange={e => setEditForm({...editForm, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean)})}
+                           placeholder="Python, JavaScript, UI/UX Design"
                         />
                      </div>
 
                      <div className="space-y-4 pt-4 border-t border-outline-variant/10">
-                        <label className="text-[9px] font-black uppercase tracking-widest opacity-40 ml-1 italic">Research Interests (Press Enter)</label>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                           {editForm.interests?.map((s, i) => (
-                              <span key={i} className="px-3 py-1 bg-secondary/10 text-secondary rounded-lg text-[10px] font-bold flex items-center gap-2">
-                                 {s}
-                                 <button type="button" onClick={() => setEditForm({...editForm, interests: editForm.interests.filter((_, idx)=>idx!==i)})} className="hover:text-black">×</button>
-                              </span>
-                           ))}
-                        </div>
-                        <input 
-                           type="text" placeholder="Add interest..." 
-                           className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-sm font-bold focus:ring-1 focus:ring-secondary/20 transition-all"
-                           onKeyDown={e => {
-                              if (e.key === 'Enter') {
-                                 e.preventDefault();
-                                 const val = e.target.value.trim();
-                                 if (val && !editForm.interests?.includes(val)) {
-                                    setEditForm({...editForm, interests: [...(editForm.interests||[]), val]});
-                                    e.target.value = '';
-                                 }
-                              }
-                           }}
+                        <label className="text-[9px] font-bold uppercase tracking-wide opacity-60">Interests (comma separated)</label>
+                        <textarea 
+                           className="w-full bg-surface-container-low border-none rounded-2xl py-3 px-4 text-sm font-medium focus:ring-1 focus:ring-primary/20 transition-all resize-none"
+                           rows="3"
+                           value={(editForm.interests || []).join(', ')}
+                           onChange={e => setEditForm({...editForm, interests: e.target.value.split(',').map(i => i.trim()).filter(Boolean)})}
+                           placeholder="AI/ML, Web Development, Robotics"
                         />
                      </div>
 
                      <div className="space-y-4 pt-4 border-t border-outline-variant/10">
                         <div className="flex items-center justify-between">
                            <div>
-                              <p className="text-sm font-black italic uppercase tracking-tight">Public Connectivity</p>
-                              <p className="text-[9px] font-bold opacity-40 uppercase tracking-widest">Make profile public</p>
+                              <p className="text-sm font-bold italic">Public Profile</p>
+                              <p className="text-[8px] font-medium opacity-60 uppercase">Make profile visible to others</p>
                            </div>
                            <button type="button" onClick={() => setEditForm({...editForm, publicVisibility: !editForm.publicVisibility})} className={`w-14 h-8 rounded-full transition-all relative ${editForm.publicVisibility ? 'bg-primary' : 'bg-surface-container-highest'}`}>
                               <div className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow-md transition-all ${editForm.publicVisibility ? 'left-7' : 'left-1'}`}></div>
@@ -400,7 +376,7 @@ export default function Profile() {
                         </div>
                      </div>
 
-                     <button type="submit" className="w-full bg-on-surface text-surface py-5 rounded-[24px] text-[10px] font-black tracking-[0.4em] uppercase hover:bg-black transition-all shadow-3xl active:scale-95 cursor-pointer">Sync Identity</button>
+                     <button type="submit" className="w-full bg-primary text-white py-4 rounded-2xl text-sm font-bold uppercase tracking-wide hover:bg-primary/90 transition-all shadow-lg active:scale-95 cursor-pointer">Save Changes</button>
                   </form>
                </div>
             </div>

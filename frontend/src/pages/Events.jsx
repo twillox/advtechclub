@@ -71,29 +71,18 @@ export default function Events() {
   const handleRegister = async (eventId) => {
     setRegistering(eventId);
     try {
-      await axios.post(`${API_BASE_URL}/api/events/${eventId}/register`, {}, { headers });
+      const response = await axios.post(`${API_BASE_URL}/api/events/${eventId}/register`, {}, { headers });
       
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
-        const u = JSON.parse(userStr);
-        if (!u.registeredEvents) u.registeredEvents = [];
-        u.registeredEvents.push(eventId);
-        localStorage.setItem("user", JSON.stringify(u));
+      // Update user data in localStorage with new XP and level
+      const userData = response.data.user;
+      if (userData) {
+        localStorage.setItem("user", JSON.stringify(userData));
       }
 
-      setEvents((prev) =>
-        prev.map((e) => {
-          if (e._id === eventId) {
-            return {
-              ...e,
-              registeredUsers: [...e.registeredUsers, "me"], 
-            };
-          }
-          return e;
-        })
-      );
+      alert(response.data.msg || "Registration successful!");
       
-      alert("Registration successful! XP Awarded.");
+      // Refresh events list
+      await fetchEvents();
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.msg || "Failed to register");
