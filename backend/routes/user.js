@@ -39,11 +39,17 @@ router.put("/profile", authMiddleware, async (req, res) => {
   try {
      const { name, department, year, profilePic, skills, interests, publicVisibility, username } = req.body;
      
-     // Check username uniqueness if changing
-     if (username) {
-        const existing = await User.findOne({ username, _id: { $ne: req.user.id } });
-        if (existing) return res.status(400).json({ msg: "Mission handle (username) already claimed." });
+     // Enforce that username is not empty to avoid MongoDB sparse index issues!
+     if (!username || username.trim() === "") {
+        return res.status(400).json({ msg: "Username is required to complete onboarding." });
      }
+     
+     if (!name || name.trim() === "") {
+        return res.status(400).json({ msg: "Name is required." });
+     }
+
+     const existing = await User.findOne({ username, _id: { $ne: req.user.id } });
+     if (existing) return res.status(400).json({ msg: "Mission handle (username) already claimed." });
 
      const user = await User.findByIdAndUpdate(
         req.user.id,
@@ -53,6 +59,7 @@ router.put("/profile", authMiddleware, async (req, res) => {
      
      res.json(user);
   } catch (err) {
+     console.error(err);
      res.status(500).json({ msg: "Regsitry update failed" });
   }
 });

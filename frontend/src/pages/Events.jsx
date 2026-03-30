@@ -68,28 +68,44 @@ export default function Events() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, query, headers]);
 
-  const handleRegister = async (eventId) => {
-    setRegistering(eventId);
-    try {
-      const response = await axios.post(`${API_BASE_URL}/api/events/${eventId}/register`, {}, { headers });
-      
-      // Update user data in localStorage with new XP and level
-      const userData = response.data.user;
-      if (userData) {
-        localStorage.setItem("user", JSON.stringify(userData));
-      }
+ const handleRegister = async (eventId) => {
+  setRegistering(eventId);
 
-      alert(response.data.msg || "Registration successful!");
-      
-      // Refresh events list
-      await fetchEvents();
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.msg || "Failed to register");
-    } finally {
-      setRegistering(null);
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Please login again");
+      navigate("/login");
+      return;
     }
-  };
+
+    const response = await axios.post(
+      `${API_BASE_URL}/api/events/${eventId}/register`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // update user if backend sends updated data
+    if (response.data.user) {
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+    }
+
+    alert(response.data.msg || "Registered successfully 🚀");
+
+    await fetchEvents(); // refresh UI
+  } catch (err) {
+    console.error("REGISTER ERROR:", err.response?.data || err);
+
+    alert(err.response?.data?.msg || "Registration failed");
+  } finally {
+    setRegistering(null);
+  }
+};
 
   const getIsRegistered = (ev) => {
     try {
