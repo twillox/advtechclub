@@ -14,12 +14,12 @@ export default function EventCard({ ev, isReg, registering, onRegister, onDelete
     }
   }
 
-  // Choose placeholder image based on category
-  const imgUrl = ev.category === "hackathon" 
+  // Choose placeholder image based on category if no custom image is set
+  const imgUrl = ev.image || (ev.category === "hackathon" 
     ? "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=800&h=400"
     : ev.category === "workshop"
     ? "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=800&h=400"
-    : "https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80&w=800&h=400";
+    : "https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&q=80&w=800&h=400");
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-surface-container-lowest shadow-[0px_12px_32px_rgba(45,52,53,0.04)] group transition-all hover:-translate-y-[2px]">
@@ -86,7 +86,7 @@ export default function EventCard({ ev, isReg, registering, onRegister, onDelete
                  ? "Wait..."
                  : isReg
                  ? "Enrolled ✓"
-                 : "Register"}
+                 : "Enroll"}
             </button>
           ) : (
              <div className="flex gap-2">

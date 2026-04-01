@@ -25,6 +25,8 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
+const User = require("../models/User");
+
 // User votes on poll
 router.post("/:id/vote", authMiddleware, async (req, res) => {
   try {
@@ -36,10 +38,29 @@ router.post("/:id/vote", authMiddleware, async (req, res) => {
     poll.options[optionIndex].votes += 1;
     poll.voters.push(req.user.id);
     
-    // Add XP reward to user logic can go here (gamification)
+    // Add XP reward to user
+    if (poll.xpReward) {
+      const user = await User.findById(req.user.id);
+      if (user) {
+         user.xp = (user.xp || 0) + poll.xpReward;
+         user.level = Math.floor(user.xp / 100) + 1;
+         await user.save();
+      }
+    }
     
     await poll.save();
     res.json(poll);
+  } catch (err) {
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// Admin delete poll
+router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const poll = await Poll.findByIdAndDelete(req.params.id);
+    if (!poll) return res.status(404).json({ msg: "Poll not found" });
+    res.json({ msg: "Poll deleted" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
   }

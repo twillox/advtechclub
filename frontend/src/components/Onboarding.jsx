@@ -44,7 +44,12 @@ export default function Onboarding({ onComplete }) {
       if (onComplete) onComplete();
       navigate("/dashboard");
     } catch (err) {
-      alert(err.response?.data?.msg || "Failed to complete profile");
+      if (err.response?.status === 401) {
+        localStorage.clear();
+        navigate("/login", { replace: true });
+      } else {
+        alert(err.response?.data?.msg || "Failed to complete profile");
+      }
     } finally {
       setLoading(false);
     }

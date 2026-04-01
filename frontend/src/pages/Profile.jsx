@@ -53,6 +53,7 @@ export default function Profile() {
       setUser(res.data);
       setEditing(false);
       localStorage.setItem("user", JSON.stringify(res.data));
+      window.dispatchEvent(new Event("userProfileUpdated"));
       alert("Profile Updated.");
     } catch (err) {
       alert(err.response?.data?.msg || "Update failure");
@@ -80,10 +81,10 @@ export default function Profile() {
   if (!user) return <div className="p-20 text-center text-outline">User not found.</div>;
 
   return (
-    <div className="bg-[#f8f9fa] text-[#2d3435] min-h-screen pb-20 font-sans selection:bg-primary/10">
+    <div className="bg-[#f8f9fa] text-[#2d3435] min-h-screen pb-48 font-sans selection:bg-primary/10">
       <Navbar />
       
-      <main className="pt-24 px-4 md:px-6 max-w-5xl mx-auto space-y-8">
+      <main className="pt-24 px-4 md:px-6 max-w-5xl mx-auto space-y-12">
         
         {/* Header Hero */}
         <section className="relative group">
@@ -93,7 +94,15 @@ export default function Profile() {
               <div className="relative flex-shrink-0">
                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-[40px] bg-gradient-to-br from-surface-container-high to-surface-container shadow-inner flex items-center justify-center overflow-hidden border-4 border-white">
                     {user.profilePic ? (
-                       <img src={user.profilePic} alt={user.name} className="w-full h-full object-cover" />
+                       <img 
+                          src={user.profilePic} 
+                          alt={user.name} 
+                          className="w-full h-full object-cover" 
+                          onError={(e) => {
+                             e.target.onerror = null; 
+                             e.target.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name) + "&background=random";
+                          }}
+                       />
                     ) : (
                        <span className="material-symbols-outlined text-5xl md:text-7xl text-outline/20">fingerprint</span>
                     )}
@@ -115,9 +124,9 @@ export default function Profile() {
                  </div>
                  
                  {isMe && (
-                    <div className="flex items-center gap-2 bg-surface-container-low p-2 rounded-2xl border border-outline-variant/10 max-w-full">
+                    <div className="flex items-center gap-2 bg-surface-container-low p-2 rounded-2xl border border-outline-variant/10 max-w-full w-fit">
                        <code className="text-[9px] md:text-[10px] font-black opacity-40 px-2 truncate">@{user.username || 'unclaimed'}</code>
-                       <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/user/${user.username}`)} className="p-2 hover:bg-white rounded-xl transition-all cursor-pointer flex-shrink-0">
+                       <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/user/${user.username}`); alert("Profile URL Copied!"); }} className="p-2 hover:bg-white rounded-xl transition-all cursor-pointer flex-shrink-0" title="Share Profile">
                           <span className="material-symbols-outlined text-[14px] md:text-[16px]">share</span>
                        </button>
                     </div>
@@ -147,17 +156,17 @@ export default function Profile() {
         </section>
 
         {/* Stats Summary Grid */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
            {[
               { label: "Points", val: user.xp, icon: "toll", color: "text-amber-500" },
               { label: "Rank", val: `#${user.rank || '??'}`, icon: "leaderboard", color: "text-rose-500" },
               { label: "Certificates", val: user.certificates?.length || 0, icon: "card_membership", color: "text-blue-500" },
               { label: "Badges", val: user.badges?.length || 0, icon: "verified", color: "text-purple-500" },
            ].map((s, i) => (
-              <div key={i} className="bg-white/40 backdrop-blur-xl p-4 md:p-6 rounded-[32px] border border-white/60 shadow-lg flex flex-col items-center justify-center text-center group hover:scale-[1.02] transition-all">
-                 <span className={`material-symbols-outlined text-xl md:text-2xl mb-1 md:mb-2 ${s.color}`}>{s.icon}</span>
-                 <p className="text-xl md:text-2xl font-black italic tracking-tighter leading-none truncate max-w-full">{s.val}</p>
-                 <p className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.2em] opacity-40 mt-1 text-center">{s.label}</p>
+              <div key={i} className="bg-white/40 backdrop-blur-xl p-8 md:p-10 rounded-[32px] border border-white/60 shadow-lg flex flex-col items-center justify-center text-center group hover:scale-[1.02] transition-all min-h-[140px] md:min-h-[160px]">
+                 <span className={`material-symbols-outlined text-3xl md:text-4xl mb-3 md:mb-4 ${s.color}`}>{s.icon}</span>
+                 <p className="text-3xl md:text-4xl font-black italic tracking-tighter leading-tight truncate max-w-full pb-1">{s.val}</p>
+                 <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mt-1 md:mt-2 text-center">{s.label}</p>
               </div>
            ))}
         </section>
@@ -199,47 +208,79 @@ export default function Profile() {
                              </div>
                           </div>
 
-                          {/* Progression Hints */}
-                          {isMe && (
-                            <div className="bg-gradient-to-br from-primary to-secondary p-8 rounded-[40px] shadow-[0px_20px_40px_rgba(0,0,0,0.1)] text-white relative overflow-hidden flex items-center gap-6">
-                               <div className="absolute top-0 right-0 p-8 opacity-20 transform translate-x-4 -translate-y-4">
-                                  <span className="material-symbols-outlined text-9xl">rocket</span>
-                               </div>
-                               <div className="bg-white/20 p-4 rounded-3xl">
-                                  <span className="material-symbols-outlined text-3xl">lightbulb_circle</span>
-                               </div>
-                               <div className="relative z-10">
-                                  <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Strategic Tip</p>
-                                  <p className="text-lg font-black tracking-tight leading-tight mt-1">{user.xp < 100 ? "Attend 1 more event to become a 'Rising Maker'!" : "Submit a project to earn the 'Architect' badge."}</p>
+                           {/* Progression Hints */}
+                           {isMe && (
+                             <div className="bg-gradient-to-br from-primary to-secondary p-8 rounded-[40px] shadow-[0px_20px_40px_rgba(0,0,0,0.1)] text-white relative overflow-hidden flex items-center gap-6 self-start w-full">
+                                <div className="absolute top-0 right-0 p-8 opacity-20 transform translate-x-4 -translate-y-4">
+                                   <span className="material-symbols-outlined text-9xl">rocket</span>
                                 </div>
-                            </div>
-                          )}
-                       </div>
+                                <div className="bg-white/20 p-4 rounded-3xl flex-shrink-0">
+                                   <span className="material-symbols-outlined text-3xl">lightbulb_circle</span>
+                                </div>
+                                <div className="relative z-10 w-full pr-8">
+                                   <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Strategic Tip</p>
+                                   <p className="text-lg font-black tracking-tight leading-tight mt-1">{user.xp < 100 ? "Attend 1 more event to become a 'Rising Maker'!" : "Submit a project to earn the 'Architect' badge."}</p>
+                                 </div>
+                             </div>
+                           )}
+                        </div>
 
-                       <div className="space-y-8">
-                          {/* Badges Preview */}
-                          <div className="bg-white p-8 rounded-[40px] shadow-2xl border border-outline-variant/5">
-                             <div className="flex justify-between items-center mb-6">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30">Top Badges</h4>
-                                <button className="text-[9px] font-black uppercase text-primary tracking-widest">View All</button>
-                             </div>
-                             <div className="grid grid-cols-3 gap-4">
-                                {user.badges?.slice(0, 6).map((b, i) => (
-                                   <div key={i} className="group relative">
-                                      <div className="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:-rotate-6 transition-all border border-outline-variant/10">
-                                         <span className="material-symbols-outlined text-2xl text-primary">{b.icon || 'star'}</span>
-                                      </div>
-                                      <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#2d3435] text-white text-[8px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                                         {b.name}
-                                      </div>
-                                   </div>
-                                ))}
-                                {(!user.badges || user.badges.length === 0) && <div className="text-[10px] font-bold text-outline opacity-20 uppercase col-span-3 text-center py-4 italic border-2 border-dashed border-outline-variant/10 rounded-2xl">Awaiting Recognition</div>}
-                             </div>
-                          </div>
-                       </div>
-                    </div>
+                        <div className="space-y-8 w-full">
+                           {/* Badges Preview */}
+                           <div className="bg-white p-8 rounded-[40px] shadow-2xl border border-outline-variant/5">
+                              <div className="flex justify-between items-center mb-6">
+                                 <h4 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30">Top Badges</h4>
+                                 <button onClick={() => setActiveTab("achievements")} className="text-[9px] font-black uppercase text-primary tracking-widest cursor-pointer hover:underline">View All</button>
+                              </div>
+                              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                                 {user.badges?.slice(0, 6).map((b, i) => {
+                                    const badgeName = b.name || b || "Badge";
+                                    const badgeIcon = b.icon || 'star';
+                                    return (
+                                    <div key={i} className="group relative mx-auto">
+                                       <div className="w-16 h-16 rounded-2xl bg-surface-container-low flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:-rotate-6 transition-all border border-outline-variant/10">
+                                          <span className="material-symbols-outlined text-2xl text-primary">{badgeIcon}</span>
+                                       </div>
+                                       <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#2d3435] text-white text-[8px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                          {typeof badgeName === 'string' ? badgeName : (badgeName.name || 'Achievement')}
+                                       </div>
+                                    </div>
+                                    );
+                                 })}
+                                 {(!user.badges || user.badges.length === 0) && <div className="text-[10px] font-bold text-outline opacity-20 uppercase col-span-2 lg:col-span-3 text-center py-4 italic border-2 border-dashed border-outline-variant/10 rounded-2xl">Awaiting Recognition</div>}
+                              </div>
+                           </div>
+                        </div>
+                     </div>
                  )}
+
+                  {activeTab === 'achievements' && (
+                     <div className="bg-white p-6 md:p-10 rounded-[48px] shadow-2xl border border-outline-variant/5 max-w-4xl mx-auto">
+                        <div className="flex items-center gap-3 mb-8">
+                           <span className="material-symbols-outlined text-2xl text-purple-500">verified</span>
+                           <h3 className="text-sm font-black uppercase tracking-[0.3em] opacity-60">All Earned Badges</h3>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                           {user.badges?.map((b, i) => {
+                              const badgeName = b.name || b || "Badge";
+                              const badgeIcon = b.icon || 'star';
+                              const badgeDate = b.dateEarned ? new Date(b.dateEarned).toLocaleDateString() : 'AWAITING';
+                              return (
+                              <div key={i} className="flex flex-col items-center text-center space-y-3 group bg-surface-container-low p-6 rounded-[32px] hover:shadow-xl transition-all border border-outline-variant/10">
+                                 <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:-rotate-12 transition-all border border-outline-variant/5">
+                                    <span className="material-symbols-outlined text-4xl text-primary">{badgeIcon}</span>
+                                 </div>
+                                 <div>
+                                    <p className="text-[10px] font-black uppercase tracking-tight text-on-surface">{typeof badgeName === 'string' ? badgeName : (badgeName.name || 'Achievement')}</p>
+                                    <p className="text-[8px] font-bold uppercase opacity-40 mt-1">{badgeDate}</p>
+                                 </div>
+                              </div>
+                              );
+                           })}
+                           {(!user.badges || user.badges.length === 0) && <div className="col-span-full text-center py-16 italic opacity-20 uppercase font-black tracking-[0.5em] text-outline">No badges claimed yet</div>}
+                        </div>
+                     </div>
+                  )}
 
                  {activeTab === 'projects' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

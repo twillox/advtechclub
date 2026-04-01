@@ -15,9 +15,9 @@ export default function Chat() {
   const headers = { Authorization: `Bearer ${localStorage.getItem("token")}` };
 
   const fetchMessages = async () => {
-    // Basic mock fetch for MVP
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/chat/${user._id || "admin"}`, { headers });
+      const uid = user._id || user.id || "admin";
+      const res = await axios.get(`${API_BASE_URL}/api/chat/${uid}`, { headers });
       setMessages(Array.isArray(res.data) ? res.data : []);
     } catch(err) { console.error(err); }
   };
@@ -28,7 +28,8 @@ export default function Chat() {
     e.preventDefault();
     if (!text) return;
     try {
-      await axios.post(`${API_BASE_URL}/api/chat`, { text, receiver: user._id }, { headers }); // Mock receiver
+      const uid = user._id || user.id;
+      await axios.post(`${API_BASE_URL}/api/chat`, { text, receiver: uid }, { headers }); // Mock receiver
       setText("");
       fetchMessages();
     } catch(err) { alert("Failed to send message"); }
@@ -47,7 +48,8 @@ export default function Chat() {
           {messages.length === 0 && <div className="text-center text-outline text-sm mt-12 py-12 bg-surface-container-lowest rounded-2xl">Start a secure conversation...</div>}
           
           {messages.map(m => {
-            const isMe = m.sender._id === user._id || m.sender === user._id;
+            const uid = user._id || user.id;
+            const isMe = m.sender._id === uid || m.sender === uid;
             return (
               <div key={m._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] p-4 rounded-2xl text-sm ${

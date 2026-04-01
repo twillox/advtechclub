@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       default: "user",
-      enum: ["user", "admin", "superadmin"],
+      enum: ["user", "admin", "student", "superadmin"],
     },
 
     xp: { type: Number, default: 0 },
@@ -89,9 +89,8 @@ const userSchema = new mongoose.Schema(
 );
 
 // 🔄 Auto-update level based on XP
-userSchema.pre("save", function (next) {
+userSchema.pre("save", function () {
   this.level = computeLevelFromXp(this.xp);
-  next();
 });
 
 module.exports =

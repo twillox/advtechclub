@@ -1,8 +1,18 @@
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user") || "{}"));
+
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      setUser(JSON.parse(localStorage.getItem("user") || "{}"));
+    };
+    window.addEventListener("userProfileUpdated", handleProfileUpdate);
+    return () => window.removeEventListener("userProfileUpdated", handleProfileUpdate);
+  }, []);
+
   if (user.role === "admin") return null;
 
   const logout = () => {
@@ -21,7 +31,11 @@ export default function Navbar() {
               <img
                 alt="User Profile"
                 className="w-full h-full object-cover"
-                src={user.profilePic || "https://lh3.googleusercontent.com/aida-public/AB6AXuAxlnNmENQINJDeHGPfBpLbz2IRQZp_uROxkkoy_XfHreksbjF7YvNwYXe8tkIYXoleRZFxKLNZzCw2vlujvLtFfHWvnDKA2rq8S3OUPqCvcz1w-R3Xxtm5jZCoLiQ3VN4aQp0AtsrcSFyWe5CVXw9F0CvtJXPddQFfzqLq7oW-2zasbX165H3BV5aDJylJUpHRr3vesAzsViKdHKf5s2z0v6WRYDsv5EaLp7POptMuVss5k-lq0IqCaiqG8qfi9sPZxFeLlSgMB3Kv"}
+                src={user.profilePic || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name || "User") + "&background=random"}
+                onError={(e) => {
+                   e.target.onerror = null; 
+                   e.target.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.name || "User") + "&background=random";
+                }}
               />
             )}
           </Link>
@@ -30,7 +44,7 @@ export default function Navbar() {
           </span>
         </div>
         <div className="flex items-center gap-4 text-[#5f5e5e]">
-          <button className="material-symbols-outlined hover:text-[#1a1a1a] transition-colors cursor-pointer text-xl">
+          <button onClick={() => navigate("/events")} className="material-symbols-outlined hover:text-[#1a1a1a] transition-colors cursor-pointer text-xl" title="Search Events">
             search
           </button>
           <button onClick={logout} className="material-symbols-outlined hover:text-error transition-colors cursor-pointer text-xl" title="Logout">

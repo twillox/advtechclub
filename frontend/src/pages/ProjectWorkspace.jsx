@@ -67,7 +67,8 @@ export default function ProjectWorkspace() {
   if (!project) return <div className="min-h-screen bg-surface flex items-center justify-center text-error font-bold">{error || "Unauthorized access"}</div>;
 
   const isAdmin = user.role === "admin";
-  const isOwner = project.owner._id === parseInt(user._id) || project.owner._id === user._id || isAdmin;
+  const uid = String(user._id || user.id);
+  const isOwner = String(project.owner._id) === uid || isAdmin;
 
   const handleReview = async (status) => {
     try {
@@ -84,6 +85,10 @@ export default function ProjectWorkspace() {
         
         {/* Workspace Header */}
         <header className="space-y-4">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[10px] font-black uppercase text-outline hover:text-primary transition-colors cursor-pointer w-fit mb-2">
+             <span className="material-symbols-outlined text-sm">arrow_back</span>
+             Back to Project Hub
+          </button>
           <div className="flex items-center gap-3">
              <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
                 {project.status || "In Development"}

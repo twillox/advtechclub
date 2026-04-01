@@ -142,9 +142,38 @@ router.post("/:id/review", authMiddleware, adminMiddleware, async (req, res) => 
     project.status = req.body.status; // Approved, Rejected
     project.scores = req.body.scores;
     project.adminFeedback = req.body.adminFeedback;
-    // Add gamification XP logic here if approved
+    
+    // Gamification XP logic
+    if (req.body.status === "Approved") {
+       const rewardXp = 200; // Big reward for passing review
+       const memberIds = [project.owner, ...project.members];
+       // De-duplicate if owner is in members array
+       const uniqueUserIds = [...new Set(memberIds.map(id => String(id)))];
+       
+       const User = require("../models/User");
+       for (const uId of uniqueUserIds) {
+          const user = await User.findById(uId);
+          if (user) {
+             user.xp = (user.xp || 0) + rewardXp;
+             user.level = Math.floor(user.xp / 100) + 1;
+             await user.save();
+          }
+       }
+    }
+    
     await project.save();
     res.json(project);
+  } catch (err) {
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// Admin Delete Project
+router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const project = await Project.findByIdAndDelete(req.params.id);
+    if (!project) return res.status(404).json({ msg: "Project not found" });
+    res.json({ msg: "Project deleted" });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
   }

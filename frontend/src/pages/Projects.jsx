@@ -43,9 +43,18 @@ export default function Projects() {
     } catch(err) { alert("Request failed"); }
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Permanently delete this project?")) return;
+    try {
+      await axios.delete(`${API_BASE_URL}/api/projects/${id}`, { headers });
+      fetchProjects();
+    } catch(err) { alert("Deletion failed"); }
+  };
+
    const isAdmin = user.role === "admin";
-   const myProjects = isAdmin ? projects : projects.filter(p => p.members.some(m => m._id === user._id));
-   const otherProjects = isAdmin ? [] : projects.filter(p => !p.members.some(m => m._id === user._id));
+   const uid = user._id || user.id;
+   const myProjects = isAdmin ? projects : projects.filter(p => p.members.some(m => m._id === uid));
+   const otherProjects = isAdmin ? [] : projects.filter(p => !p.members.some(m => m._id === uid));
 
    return (
     <div className="bg-surface text-on-surface min-h-screen pb-32 font-sans selection:bg-primary/20">
@@ -82,7 +91,7 @@ export default function Projects() {
              {myProjects.length === 0 && <p className="text-xs text-on-surface-variant font-medium text-center py-16 bg-surface-container-low/20 rounded-[40px] border border-dashed border-outline-variant/30 italic opacity-40">Zero active submissions detected in this sector.</p>}
              <div className="grid grid-cols-1 gap-6">
                {myProjects.map(p => {
-                 const isOwner = p.owner._id === user._id || isAdmin;
+                 const isOwner = p.owner._id === uid || isAdmin;
                  return (
                    <div key={p._id} className="bg-surface-container-lowest p-8 rounded-[40px] shadow-[0px_32px_80px_rgba(45,52,53,0.04)] border border-outline-variant/5 space-y-6 group transition-all hover:bg-surface-container-low/50 hover:shadow-2xl hover:-translate-y-1">
                       <div className="flex justify-between items-start">
@@ -106,7 +115,7 @@ export default function Projects() {
                            {isAdmin ? "SUPERVISE SPACE" : isOwner ? "MANAGE WORKSPACE" : "ENTER WORKSPACE"}
                         </button>
                         {isAdmin && (
-                           <button className="w-14 h-14 bg-error/5 text-error rounded-2xl flex items-center justify-center hover:bg-error/10 transition-colors border border-error/5 outline-none cursor-pointer">
+                           <button onClick={(e) => { e.stopPropagation(); handleDelete(p._id); }} className="w-14 h-14 bg-error/5 text-error rounded-2xl flex items-center justify-center hover:bg-error/10 transition-colors border border-error/5 outline-none cursor-pointer">
                               <span className="material-symbols-outlined text-lg">delete</span>
                            </button>
                         )}
@@ -123,7 +132,7 @@ export default function Projects() {
                 <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant border-l-4 border-outline-variant pl-6">Scale Up (Opportunities)</h2>
                 <div className="grid grid-cols-1 gap-4">
                   {otherProjects.map(p => {
-                    const isPending = p.joinRequests?.some(r => r._id === user._id);
+                    const isPending = p.joinRequests?.some(r => r._id === uid);
                     return (
                     <div key={p._id} className="bg-surface-container-low/30 p-8 rounded-[40px] border border-outline-variant/10 space-y-4 transition-all hover:bg-surface-container-lowest hover:shadow-xl group">
                         <div className="flex justify-between items-center">

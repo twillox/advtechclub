@@ -110,11 +110,13 @@ export default function Events() {
   const getIsRegistered = (ev) => {
     try {
       const u = JSON.parse(localStorage.getItem("user") || "{}");
-      if (!u || !u._id) return false;
       const uid = u._id || u.id;
-      return (ev.registeredUsers || []).some(
-        (userId) => String(userId) === String(uid) || userId === "me"
-      );
+      if (!uid) return false;
+      return (ev.registeredUsers || []).some((userObj) => {
+        if (!userObj) return false;
+        const idToCheck = typeof userObj === "object" ? userObj._id : userObj;
+        return String(idToCheck) === String(uid) || idToCheck === "me";
+      });
     } catch {
       return false;
     }
@@ -132,17 +134,46 @@ export default function Events() {
   const handleManage = async (ev) => {
     setManagingEvent(ev);
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/events/${ev._id}/registrations`, { headers });
-      setAttendees(res.data);
+      // Re-fetch event to get latest data including populated registeredUsers
+      const res = await axios.get(`${API_BASE_URL}/api/events`, { headers });
+      const updatedEv = (res.data || []).find(e => e._id === ev._id) || ev;
+      
+      const attendedIds = (updatedEv.attendedUsers || []).map(id => String(id));
+      const absentIds = (updatedEv.absentUsers || []).map(id => String(id));
+      
+      const mappedAttendees = (updatedEv.registeredUsers || []).filter(u => u != null).map(u => ({
+         _id: u._id,
+         name: u.name,
+         level: u.level || 1,
+         xp: u.xp || 0,
+         email: u.email,
+         attendanceStatus: attendedIds.includes(String(u._id)) ? "Present" : 
+                           absentIds.includes(String(u._id)) ? "Absent" : "Not Marked"
+      }));
+
+      setAttendees(mappedAttendees);
+      setManagingEvent(prev => ({ ...prev, ...updatedEv }));
     } catch (err) { alert("Database failure"); }
   };
 
-  const handleMarkAttendance = async (userId) => {
+  const handleMarkAttendance = async (userId, status) => {
+     if (managingEvent?.isFinalized) {
+        alert("Event is finalized. Attendance cannot be modified.");
+        return;
+     }
      try {
-        await axios.post(`${API_BASE_URL}/api/events/${managingEvent._id}/attend`, { userId }, { headers });
-        alert("Attendance Authenticated. XP Synchronized.");
-        handleManage(managingEvent); // Refresh
+        await axios.post(`${API_BASE_URL}/api/events/${managingEvent._id}/attend`, { userId, status }, { headers });
+        await handleManage(managingEvent); // Refresh cleanly
      } catch (err) { alert(err.response?.data?.msg || "Sync failed"); }
+  };
+
+  const handleFinalizeEvent = async () => {
+     if (!window.confirm("Finalize attendance? Unmarked users will be set to Absent. This cannot be undone.")) return;
+     try {
+        await axios.post(`${API_BASE_URL}/api/events/${managingEvent._id}/finalize`, {}, { headers });
+        alert(`Event Finalized!`);
+        await handleManage(managingEvent); // Refresh cleanly
+     } catch (err) { alert(err.response?.data?.msg || "Finalize failed"); }
   };
 
   const handleAwardBadge = async (userId) => {
@@ -161,6 +192,10 @@ export default function Events() {
 
   const handleUpdateEvent = async (e) => {
      e.preventDefault();
+     if (editForm.image && !editForm.image.match(/\.(jpeg|jpg|png|webp|gif)(\?.*)?$/i)) {
+        alert("Invalid image URL. Must be .jpg, .png, or .webp");
+        return;
+     }
      try {
         await axios.patch(`${API_BASE_URL}/api/events/${editingEvent._id}`, editForm, { headers });
         setEditingEvent(null);
@@ -302,7 +337,15 @@ export default function Events() {
                </div>
 
                <div className="p-10 overflow-y-auto flex-1 space-y-6">
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-outline italic opacity-40">Registered Users ({attendees.length})</h4>
+                  <div className="flex justify-between items-center">
+                     <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-outline italic opacity-40">Registered Users ({attendees.length})</h4>
+                     {managingEvent.isFinalized && (
+                        <span className="bg-surface-container-high text-outline px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-inner">FINALIZED</span>
+                     )}
+                     {!managingEvent.isFinalized && attendees.length > 0 && (
+                        <button onClick={handleFinalizeEvent} className="bg-rose-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all cursor-pointer hover:bg-rose-600">FINALIZE EVENT</button>
+                     )}
+                  </div>
                   <div className="space-y-4">
                      {attendees.map(a => (
                         <div key={a._id} className="bg-surface-container-low p-6 rounded-3xl flex justify-between items-center group hover:bg-surface-container-high transition-all border border-outline-variant/5">
@@ -316,16 +359,30 @@ export default function Events() {
                               </div>
                            </div>
                            <div className="flex gap-2">
-                              {a.hasAttended ? (
-                                <span className="px-4 py-2 bg-surface-dim text-outline rounded-xl text-[9px] font-black uppercase tracking-widest opacity-50 cursor-not-allowed flex items-center justify-center">
-                                   Present ✓
+                              {a.attendanceStatus === "Present" ? (
+                                <span className="px-3 py-2 bg-green-50 text-green-600 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center">
+                                   Present
                                 </span>
                               ) : (
                                 <button 
-                                   onClick={() => handleMarkAttendance(a._id)}
-                                   className="px-4 py-2 bg-primary/10 text-primary rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all cursor-pointer"
+                                   disabled={managingEvent.isFinalized}
+                                   onClick={() => handleMarkAttendance(a._id, "Present")}
+                                   className={`px-3 py-2 bg-primary/10 text-primary rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${managingEvent.isFinalized ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary hover:text-white cursor-pointer'}`}
                                 >
                                    Mark Present
+                                </button>
+                              )}
+                              {a.attendanceStatus === "Absent" ? (
+                                <span className="px-3 py-2 bg-rose-50 text-rose-600 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center">
+                                   Absent
+                                </span>
+                              ) : (
+                                <button 
+                                   disabled={managingEvent.isFinalized}
+                                   onClick={() => handleMarkAttendance(a._id, "Absent")}
+                                   className={`px-3 py-2 bg-rose-500/10 text-rose-500 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${managingEvent.isFinalized ? 'opacity-50 cursor-not-allowed' : 'hover:bg-rose-500 hover:text-white cursor-pointer'}`}
+                                >
+                                   Mark Absent
                                 </button>
                               )}
                               <button 
@@ -357,6 +414,7 @@ export default function Events() {
 
                <div className="space-y-4">
                   <input required placeholder="Title" className="w-full bg-surface-container-low p-5 rounded-2xl border-none font-bold text-sm focus:ring-1" value={editForm.title} onChange={e=>setEditForm({...editForm, title:e.target.value})} />
+                  <input placeholder="Image URL (jpg/png)" className="w-full bg-surface-container-low p-5 rounded-2xl border-none font-bold text-sm focus:ring-1" value={editForm.image || ''} onChange={e=>setEditForm({...editForm, image:e.target.value})} />
                   <textarea rows="3" placeholder="Description" className="w-full bg-surface-container-low p-5 rounded-2xl border-none font-bold text-xs focus:ring-1" value={editForm.description} onChange={e=>setEditForm({...editForm, description:e.target.value})}></textarea>
                   <div className="grid grid-cols-2 gap-4">
                      <input type="datetime-local" className="bg-surface-container-low p-4 rounded-xl border-none font-bold text-xs" value={editForm.date} onChange={e=>setEditForm({...editForm, date:e.target.value})} />

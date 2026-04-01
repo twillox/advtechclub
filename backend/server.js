@@ -13,6 +13,9 @@ const pollRoutes = require("./routes/poll");
 const chatRoutes = require("./routes/chat");
 const notificationRoutes = require("./routes/notification");
 
+// Initialize Data Lifecycle Cron Jobs
+require("./utils/cronJobs");
+
 const app = express();
 
 // Enhanced CORS for production
@@ -26,6 +29,10 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve Public Files (Backups/Data Sheets)
+const path = require("path");
+app.use("/backups", express.static(path.join(__dirname, "public", "backups")));
 
 // Routes
 app.use("/api/auth", authRoutes);

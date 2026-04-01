@@ -25,4 +25,15 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
+// Admin delete resource
+router.delete("/:id", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const resource = await Resource.findByIdAndDelete(req.params.id);
+    if (!resource) return res.status(404).json({ msg: "Resource not found" });
+    res.json({ msg: "Resource deleted" });
+  } catch (err) {
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
 module.exports = router;

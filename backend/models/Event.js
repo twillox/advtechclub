@@ -13,6 +13,10 @@ const eventSchema = new mongoose.Schema({
     enum: ["workshop", "hackathon", "seminar"],
     default: "workshop"
   },
+  image: {
+    type: String,
+    default: ""
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"
@@ -28,7 +32,17 @@ const eventSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "User"
     }
-  ]
+  ],
+  absentUsers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }
+  ],
+  isFinalized: {
+    type: Boolean,
+    default: false
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Event", eventSchema);

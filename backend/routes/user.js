@@ -34,6 +34,17 @@ router.get("/leaderboard", async (req, res) => {
   }
 });
 
+// GET STATS (Admin only)
+router.get("/stats", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    res.json({ totalUsers });
+  } catch (err) {
+    console.error("Stats Error:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
 // UPDATE PROFILE
 router.put("/profile", authMiddleware, async (req, res) => {
   try {
@@ -119,6 +130,18 @@ router.post("/award-badge-manual", authMiddleware, adminMiddleware, async (req, 
     res.json({ msg: "Badge awarded successfully", badges: user.badges });
   } catch (err) {
     res.status(500).json({ msg: "Badge issuance protocol failed" });
+  }
+});
+
+const DataExport = require("../models/DataExport");
+
+// GET DATA EXPORT WARNINGS (Admin only)
+router.get("/data-warnings", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const warnings = await DataExport.find().sort({ createdAt: -1 }).limit(1);
+    res.json(warnings);
+  } catch (err) {
+    res.status(500).json({ msg: "Backup fetch failed" });
   }
 });
 
